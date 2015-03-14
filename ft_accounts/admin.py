@@ -14,10 +14,10 @@ class UserProfileAdmin(UserAdmin):
     list_display = ('id', 'nickname', 'email', 'is_active', 'date_joined', 'is_staff')
     list_display_links = ('id', 'nickname', 'email')
     list_filter = ('is_staff', 'is_superuser', 'groups')
-    search_fields = ['email', 'username', 'profile__nickname']
+    search_fields = ['email', 'username']
 
     def nickname(self, obj):
-        return "%s" % obj.profile.nickname
+        return "%s" % obj.username
     nickname.short_description = u'昵称'
 
 admin.site.unregister(User)

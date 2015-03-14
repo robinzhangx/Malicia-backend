@@ -20,7 +20,7 @@ class UserExists(APIView):
 
         elif 'nickname' in request.GET:
             nickname = request.GET['nickname']
-            if User.objects.filter(profile__nickname=nickname).exists():
+            if User.objects.filter(username=nickname).exists():
                 return Response({
                     'existing': True
                 })
@@ -42,9 +42,6 @@ class Register(APIView):
                 user = User(username=nickname, email=email)
                 user.set_password(password)
                 user.save()
-
-                user.profile.nickname = nickname
-                user.profile.save()
 
                 # return the created user
                 user_serializer = UserSerializer(user)

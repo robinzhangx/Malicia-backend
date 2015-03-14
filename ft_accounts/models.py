@@ -15,7 +15,6 @@ class UserProfile(models.Model):
     )
 
     user = models.OneToOneField(User, related_name='profile')
-    nickname = models.CharField(u'昵称', max_length=128, unique=True, db_index=True)
     height = models.FloatField(u'身高', default=160)
     gender = models.CharField(u'性别', max_length=8, choices=Gender)
     weight = models.FloatField(u'体重(kg)', default=60)
