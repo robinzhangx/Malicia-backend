@@ -18,11 +18,11 @@ def dev():
     env.path = '/var/deploy/%s' % env.project_name
     env.activate = 'source ' + env.path + '/virt-python/bin/activate'
 
-    env.depot = 'git@github.com:robinzhangx/Malicia-backend.git'
-    env.depot_name = env.project_name
+    env.depot = 'https://github.com/robinzhangx/Malicia-backend.git'
+    env.depot_name = "fitting"
     env.branch = 'master'
 
-    env.mysql = True
+    env.mysql = False
     env.mysql_password = 'Fitting123'
     env.mysql_username = 'fitting'
     env.mysql_dbname = 'fitting'
@@ -56,7 +56,7 @@ def install_nginx():
             sudo("apt-get update")
 
         require.deb.package('nginx')
-        put("vender/nginx_util/*",  "/usr/bin/", use_sudo=True, mode="770")
+        put("vendor/nginx_util/*",  "/usr/bin/", use_sudo=True, mode="770")
 
 @task
 def init():
@@ -89,10 +89,11 @@ def init():
 
         install_nginx()
 
-        require.mysql.server(password=env.mysql_password)
-        with settings(mysql_user='root', mysql_password=env.mysql_password):
-            require.mysql.user(env.mysql_username, env.mysql_password)
-            require.mysql.database(env.mysql_dbname, owner=env.mysql_username)
+        if env.mysql:
+            require.mysql.server(password=env.mysql_password)
+            with settings(mysql_user='root', mysql_password=env.mysql_password):
+                require.mysql.user(env.mysql_username, env.mysql_password)
+                require.mysql.database(env.mysql_dbname, owner=env.mysql_username)
 
 
 @task
@@ -102,7 +103,7 @@ def check_out():
     with cd(env.path):
         if not exists(os.path.join(env.path, env.depot_name)):
             print green('Git folder not there, create it')
-            run("git clone %s" % env.depot)
+            run("git clone %s %s" % (env.depot, env.depot_name))
             sudo("chmod 777 %s" % env.depot_name)
             with cd(env.depot_name):
                 run("git checkout %s" % env.branch)
