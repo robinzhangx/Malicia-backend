@@ -1,5 +1,8 @@
+# coding=utf-8
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from ft_accounts.models import UserProfile
 
 
@@ -7,6 +10,31 @@ class UserRegisterSerializer(serializers.Serializer):
     nickname = serializers.CharField(max_length=128)
     email = serializers.EmailField()
     password = serializers.CharField(max_length=64)
+
+
+class UserLoginSerializer(serializers.Serializer):
+    nickname = serializers.CharField(max_length=128, default=None)
+    email = serializers.EmailField(default=None)
+    password = serializers.CharField(max_length=64)
+
+    def validate(self, attrs):
+        nickname = attrs.get('nickname')
+        email = attrs.get('email')
+        password = attrs.get('password')
+
+        if (nickname or email) and password:
+            user = authenticate(username=nickname, email=email, password=password)
+
+            if user:
+                if not user.is_active:
+                    raise ValidationError(u'用户没有激活')
+            else:
+                raise ValidationError(u'无法使用提供的账号登录')
+        else:
+            raise ValidationError(u'请提供昵称或邮箱以及密码')
+
+        attrs['user'] = user
+        return attrs
 
 
 class ProfileSerializer(serializers.ModelSerializer):

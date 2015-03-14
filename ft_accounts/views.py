@@ -6,7 +6,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from ft_accounts.serializers import UserRegisterSerializer, UserSerializer
+from ft_accounts.serializers import UserRegisterSerializer, UserSerializer, UserLoginSerializer
 
 
 class UserExists(APIView):
@@ -61,6 +61,22 @@ class Register(APIView):
         else:
             return Response(serializer.errors, status=400)
 
+
+class Login(APIView):
+    def post(self, request):
+        serializer = UserLoginSerializer(data=request.POST)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            # return the created user
+            user_serializer = UserSerializer(user)
+            result = user_serializer.data
+            token, _ = Token.objects.get_or_create(user=user)
+            result.update({
+                "token": token.key
+            })
+            return Response(result, status=201)
+        else:
+            return Response(serializer.errors, status=401)
 
 class Logout(APIView):
     permission_classes = (IsAuthenticated,)

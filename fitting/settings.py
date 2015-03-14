@@ -90,3 +90,9 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     )
 }
+
+# Authentication backend
+AUTHENTICATION_BACKENDS = (
+    'ft_accounts.auth_backend.AuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
