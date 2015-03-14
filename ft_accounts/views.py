@@ -78,6 +78,7 @@ class Login(APIView):
         else:
             return Response(serializer.errors, status=401)
 
+
 class Logout(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -86,3 +87,11 @@ class Logout(APIView):
         logout(request)
         # Do some clean up logic
         return Response(status=200)
+
+
+class Me(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        user = request.user
+        return Response(UserSerializer(user).data)

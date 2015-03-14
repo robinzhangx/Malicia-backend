@@ -1,5 +1,5 @@
 from django.conf.urls import patterns, url
-from ft_accounts.views import UserExists, Register, Logout, Login
+from ft_accounts.views import UserExists, Register, Logout, Login, Me
 
 urlpatterns = patterns(
     '',
@@ -7,4 +7,5 @@ urlpatterns = patterns(
     url('api/accounts/register', Register.as_view()),
     url('api/accounts/logout', Logout.as_view()),
     url('api/accounts/login', Login.as_view()),
+    url('api/accounts/me', Me.as_view()),
 )
