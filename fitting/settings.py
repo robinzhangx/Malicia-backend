@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'rest_framework',
     'rest_framework.authtoken',
     'ft_accounts',
+    'ft_fitting',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -85,6 +86,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'publish/static')
+
+# Media files path
+MEDIA_ROOT = '/var/media/fitting/'
+MEDIA_URL = '/media/'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

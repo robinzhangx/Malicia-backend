@@ -10,6 +10,7 @@ from fabric.contrib.files import exists, contains
 from fabtools import require
 from fabtools.python import virtualenv as python_virtualenv
 
+
 @task
 def dev():
     env.host_string = '112.126.80.172'

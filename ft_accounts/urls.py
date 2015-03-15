@@ -8,4 +8,5 @@ urlpatterns = patterns(
     url('api/accounts/logout', Logout.as_view()),
     url('api/accounts/login', Login.as_view()),
     url('api/accounts/me', Me.as_view()),
+
 )
