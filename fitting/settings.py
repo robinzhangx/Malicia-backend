@@ -12,20 +12,27 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+import json
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
+env = {}
+# noinspection PyBroadException
+try:
+    with open('env.json', 'r') as f:
+        env = json.load(f)
+except Exception:
+    pass  # If the env.json not existing, we do nothing
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'mk&81(7*-#kzj_ctc0eqt(go4a@d&t9aook$z3@b@a5r5hqe7g'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-TEMPLATE_DEBUG = True
+# dev staging prod
+if env.get('environment', 'dev') != "dev":
+    DEBUG = False
+    TEMPLATE_DEBUG = False
+else:
+    DEBUG = True
+    TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
 
 # Application definition
 
@@ -59,13 +66,24 @@ WSGI_APPLICATION = 'fitting.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+        'ENGINE': 'django.db.backends.mysql',
+        'OPTIONS': {
+            'read_default_file': os.path.join(BASE_DIR, 'config/mysql.cnf'),
+        }
+    },
 }
+
+if env.get('environment', 'dev') != 'prod':
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.mysql',
+        'HOST': '192.168.59.103',
+        'PORT': 3306,
+        'NAME': 'fitting',
+        'USER': 'fitting',
+        'PASSWORD': 'Fitting123',
+    }
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/

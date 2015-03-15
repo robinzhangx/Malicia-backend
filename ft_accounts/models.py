@@ -39,7 +39,7 @@ class WeixinAccount(models.Model):
     access_token = models.TextField(null=True, blank=True)
     expires_in = models.DateTimeField(null=True)
     refresh_token = models.TextField(null=True, blank=True)
-    union_id = models.TextField(null=True, blank=True, db_index=True, unique=True)
+    union_id = models.CharField(null=True, blank=True, max_length=32, db_index=True, unique=True)
     open_id = models.TextField(null=True, blank=True)
 
     nickname = models.TextField(null=True, blank=True)
