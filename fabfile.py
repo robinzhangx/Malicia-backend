@@ -141,9 +141,10 @@ def config_webserver(is_quick=False):
                 require.directory(env.media_dir, owner='www-data', group='www-data', mode='775', use_sudo=True)
                 require.directory(env.wsgi_dir, owner='www-data', group='www-data', mode='775', use_sudo=True)
                 sudo('cp -r . %s' % env.wsgi_dir)
+                sudo('chown -R www-data:www-data %s' % env.wsgi_dir)
 
             with cd(env.wsgi_dir):
-                env.env_dict["ENV"] = "production"
+                env.env_dict["environment"] = "prod"
 
                 json_env = json.dumps(env.env_dict)
                 put(StringIO(json_env), 'env.json', use_sudo=True)
