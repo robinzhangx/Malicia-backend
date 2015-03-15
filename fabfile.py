@@ -139,6 +139,9 @@ def config_webserver(is_quick=False):
                 sudo('cp -r publish/* %s' % env.static_dir)
                 sudo('rm -r publish')
                 require.directory(env.media_dir, owner='www-data', group='www-data', mode='775', use_sudo=True)
+                if exists(env.wsgi_dir):
+                    sudo('rm -rf %s' % env.wsgi_dir + '.bak')
+                    sudo('mv %s %s' % (env.wsgi_dir, env.wsgi_dir + '.bak'))
                 require.directory(env.wsgi_dir, owner='www-data', group='www-data', mode='775', use_sudo=True)
                 sudo('cp -r . %s' % env.wsgi_dir)
                 sudo('chown -R www-data:www-data %s' % env.wsgi_dir)
