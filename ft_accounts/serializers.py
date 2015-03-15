@@ -2,6 +2,7 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework import serializers
+from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
 from ft_accounts.models import UserProfile
 
@@ -49,3 +50,14 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'email', 'date_joined', 'profile')
+
+
+def serialize_user_with_token(user, with_token=False):
+    return_obj = UserSerializer(user).data
+
+    if with_token:
+        token, _ = Token.objects.get_or_create(user=user)
+        return_obj.update({
+            "token": token.key
+        })
+    return return_obj

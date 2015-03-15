@@ -77,4 +77,45 @@ class UserTest(TestCase):
         pprint(res.content)
         self.assertEqual(res.status_code, 201)
 
+    def test_weixin_bind(self):
+        response = self.client.post('/api/accounts/bind/weixin/', {
+            "access_token": "OezXcEiiBSKSxW0eoylIeMYxHx-1KFpzC8sjKIw3QJKJrOvfUsHqXnoEHwaT86uB4j6sSUOB7Ja0RguxeocwVo9WE27zgQIV4RdzeahoPl7BCZSM51qPLqoW8b69N2xy9NYDB0Tac0HG6saA_nlx_w",
+            "expires_in": 7200,
+            "openid": "oMA2BuD8GVqc27rdyFC5cahrfvDA",
+            "refresh_token": "OezXcEiiBSKSxW0eoylIeMYxHx-1KFpzC8sjKIw3QJKJrOvfUsHqXnoEHwaT86uBw2VpHTkdh6N9mnzGrwIPvC5X_9KvbIioysyMEMApY0lHqel35E3I9SgyKO4RMtJ4QE13yxwVpRA_kJYjVm91jw",
+            "scope": "snsapi_userinfo",
+            "unionid": "o-p4Ss4dS3Z8hE33nL0YPP4yeZw4",
+            "city": "Haidian",
+            "country": "CN",
+            "headimgurl": "http://wx.qlogo.cn/mmopen/ajNVdqHZLLCMIkG3POj0tPzxGiaGvpk9GRGZN92NCP0TsTCib6VGCDe4ichSLOheHXbYZAdic35lTKvUmaYCa4G6nA/0",
+            "language": "en",
+            "nickname": "Robin",
+            "province": "Beijing",
+            "sex": 1,
+        })
 
+        self.assertEqual(response.status_code, 201)
+        pprint(response.content)
+        obj = json.loads(response.content)
+
+        self.assertIsNotNone(obj.get('token', None))
+        token = obj['token']
+
+        response = self.client.post('/api/accounts/bind/weixin/', {
+            "access_token": "OezXcEiiBSKSxW0eoylIeMYxHx-1KFpzC8sjKIw3QJKJrOvfUsHqXnoEHwaT86uB4j6sSUOB7Ja0RguxeocwVo9WE27zgQIV4RdzeahoPl7BCZSM51qPLqoW8b69N2xy9NYDB0Tac0HG6saA_nlx_w",
+            "expires_in": 7200,
+            "openid": "oMA2BuD8GVqc27rdyFC5cahrfvDA",
+            "refresh_token": "OezXcEiiBSKSxW0eoylIeMYxHx-1KFpzC8sjKIw3QJKJrOvfUsHqXnoEHwaT86uBw2VpHTkdh6N9mnzGrwIPvC5X_9KvbIioysyMEMApY0lHqel35E3I9SgyKO4RMtJ4QE13yxwVpRA_kJYjVm91jw",
+            "scope": "snsapi_userinfo",
+            "unionid": "o-p4Ss4dS3Z8hE33nL0YPP4yeZw4",
+            "city": "Haidian",
+            "country": "CN",
+            "headimgurl": "http://wx.qlogo.cn/mmopen/ajNVdqHZLLCMIkG3POj0tPzxGiaGvpk9GRGZN92NCP0TsTCib6VGCDe4ichSLOheHXbYZAdic35lTKvUmaYCa4G6nA/0",
+            "language": "en",
+            "nickname": "Robin",
+            "province": "Beijing",
+            "sex": 1,
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json.loads(response.content)['token'], token)
