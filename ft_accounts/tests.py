@@ -2,7 +2,7 @@
 import json
 from pprint import pprint
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
+from ft_accounts.models import User
 from django.test import TestCase
 
 
@@ -25,6 +25,30 @@ class UserTest(TestCase):
             'password': 'testpass'
         })
 
+        pprint(response.content)
+
+        self.assertEqual(response.status_code, 409)
+
+    def test_user_register_dup_email(self):
+        response = self.client.get('/api/accounts/register/')
+        self.assertEqual(response.status_code, 405)
+
+        response = self.client.post("/api/accounts/register/", {
+            'nickname': 'nickname',
+            'email': 'test@test.com',
+            'password': 'testpass'
+        })
+
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.post("/api/accounts/register/", {
+            'nickname': 'nick',
+            'email': 'test@test.com',
+            'password': 'testpass'
+        })
+
+        pprint(response.content)
+
         self.assertEqual(response.status_code, 409)
 
     def test_user_nickname_unicode(self):
@@ -36,7 +60,7 @@ class UserTest(TestCase):
 
         self.assertEqual(response.status_code, 201)
         user = User.objects.get(id=1)
-        self.assertEqual(user.username, u'哈哈哈')
+        self.assertEqual(user.nickname, u'哈哈哈')
 
     def test_user_logout(self):
         response = self.client.post("/api/accounts/register/", {
@@ -53,7 +77,7 @@ class UserTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_auth_backend(self):
-        user = User(username="test", email="test@test.com")
+        user = User(nickname="test", email="test@test.com")
         user.set_password("hahahah")
         user.save()
         user = authenticate(nickname="test", password="hahahah")
@@ -77,7 +101,6 @@ class UserTest(TestCase):
         pprint(res.content)
         self.assertEqual(res.status_code, 201)
 
-
     def test_user_login_email(self):
         self.client.post("/api/accounts/register/", {
             'nickname': u'  哈哈哈  ',
@@ -92,7 +115,6 @@ class UserTest(TestCase):
 
         pprint(res.content)
         self.assertEqual(res.status_code, 201)
-
 
     def test_weixin_bind(self):
         response = self.client.post('/api/accounts/bind/weixin/', {

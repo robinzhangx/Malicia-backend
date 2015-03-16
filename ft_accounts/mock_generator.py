@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from ft_accounts.models import User
 from fitting.mock_generator import MockGeneratorBase
 
 

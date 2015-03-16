@@ -1,7 +1,5 @@
 # coding=utf-8
-from collections import defaultdict
 from itertools import groupby
-from pprint import pprint
 import random
 from fitting.mock_generator import MockGeneratorBase
 from ft_fitting.models import Fitting, Ingredient

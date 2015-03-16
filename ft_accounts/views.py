@@ -1,12 +1,11 @@
 from pprint import pprint
 import datetime
 from django.contrib.auth import logout
-from django.contrib.auth.models import User
 from django.db import IntegrityError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from ft_accounts.models import WeixinAccount, UserProfile
+from ft_accounts.models import WeixinAccount, User
 from ft_accounts.serializers import UserRegisterSerializer, UserSerializer, UserLoginSerializer, \
     serialize_user_with_token
 
@@ -41,13 +40,24 @@ class Register(APIView):
                 email = serializer.validated_data.get('email')
                 password = serializer.validated_data.get('password')
 
-                user = User(username=nickname, email=email)
+                user = User(nickname=nickname, email=email)
                 user.set_password(password)
                 user.save()
                 return Response(serialize_user_with_token(user, with_token=True), status=201)
             except IntegrityError, e:
+                error_message = e.message
+                if error_message.find('username') != -1:
+                    error_code = 4001
+                    error_message = 'nickname already taken'
+                elif error_message.find('email') != -1:
+                    error_code = 4002
+                    error_message = 'email already taken'
+                else:
+                    error_code = 4003
+
                 return Response({
-                    "message": e.message
+                    "code": error_code,
+                    "message": error_message,
                 }, status=409)
         else:
             return Response(serializer.errors, status=400)
@@ -133,22 +143,22 @@ class WeixinBind(APIView):
             if request.user.is_authenticated():
                 weixin.user = request.user
                 # If user don't have avatar yet, use the weixin
-                if weixin.user.profile.avatar is None:
-                    weixin.user.profile.avatar = weixin.avatar
-                    weixin.user.profile.save()
+                if weixin.user.avatar is None:
+                    weixin.user.avatar = weixin.avatar
+                    weixin.user.save()
                 weixin.save()
                 return Response(status=200)
             else:
                 # Create a new user, try to use the nickname if not applicable, then we append some random chars
-                user = User(username=nickname)
+                user = User(nickname=nickname)
                 user.set_unusable_password()
                 user.save()
 
                 weixin.user = user
                 weixin.save()
 
-                user.profile.gender = UserProfile.Gender_Male if weixin.male() else UserProfile.Gender_Female
-                user.profile.save()
+                user.gender = User.Gender_Male if weixin.male() else User.Gender_Female
+                user.save()
 
                 return Response(serialize_user_with_token(user, with_token=True), status=201)
 

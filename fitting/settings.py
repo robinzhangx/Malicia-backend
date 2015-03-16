@@ -79,7 +79,7 @@ DATABASES = {
 if env.get('environment', 'dev') != 'prod':
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'db.sqlite'
+        'NAME': 'db.sqlite3'
     }
 
 # Internationalization
@@ -118,3 +118,5 @@ AUTHENTICATION_BACKENDS = (
     'ft_accounts.auth_backend.AuthBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
+
+AUTH_USER_MODEL = "ft_accounts.User"

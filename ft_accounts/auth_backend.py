@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from ft_accounts.models import User
 
 
 class AuthBackend(object):
@@ -6,7 +6,7 @@ class AuthBackend(object):
         password = password
 
         if nickname is not None:
-            users = User.objects.filter(username=nickname)
+            users = User.objects.filter(nickname=nickname)
         elif email is not None:
             users = User.objects.filter(email=email)
         else:

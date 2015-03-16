@@ -1,10 +1,9 @@
 # coding=utf-8
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
-from ft_accounts.models import UserProfile
+from ft_accounts.models import User
 
 
 class UserRegisterSerializer(serializers.Serializer):
@@ -44,18 +43,10 @@ class UserLoginSerializer(serializers.Serializer):
         return attrs
 
 
-class ProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserProfile
-        read_only_fields = ('nickname', 'height', 'weight', 'bmi')
-
-
 class UserSerializer(serializers.ModelSerializer):
-    profile = ProfileSerializer()
-
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'date_joined', 'profile')
+        fields = ('id', 'nickname', 'email', 'date_joined', 'avatar', 'height', 'gender', 'weight', 'bmi')
 
 
 def serialize_user_with_token(user, with_token=False):
