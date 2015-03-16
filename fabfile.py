@@ -19,9 +19,10 @@ def dev():
     env.path = '/var/deploy/%s' % env.project_name
     env.activate = 'source ' + env.path + '/virt-python/bin/activate'
 
-    env.depot = 'https://github.com/robinzhangx/Malicia-backend.git'
+    env.depot = 'git@github.com:robinzhangx/Malicia-backend.git'
     env.depot_name = "fitting"
     env.branch = 'master'
+    env.deployment_key = True
 
     env.mysql = False
     env.mysql_password = 'Fitting123'
@@ -101,6 +102,12 @@ def init():
 def check_out():
     banner("check out")
     require.git.command()
+
+    if 'deployment_key' in env:
+        run('mkdir -p ~/.ssh && chmod 700 ~/.ssh')
+        put('deployment', '~/.ssh/id_rsa')
+        run('chmod 600 ~/.ssh/id_rsa')
+
     with cd(env.path):
         if not exists(os.path.join(env.path, env.depot_name)):
             print green('Git folder not there, create it')
