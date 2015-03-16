@@ -8,23 +8,29 @@ from ft_accounts.models import UserProfile
 
 
 class UserRegisterSerializer(serializers.Serializer):
+    # TODO make sure nickname not contain @
     nickname = serializers.CharField(max_length=128)
     email = serializers.EmailField()
     password = serializers.CharField(max_length=64)
 
 
 class UserLoginSerializer(serializers.Serializer):
-    nickname = serializers.CharField(max_length=128, default=None)
-    email = serializers.EmailField(default=None)
+    identifier = serializers.CharField(max_length=128, default=None)
     password = serializers.CharField(max_length=64)
 
     def validate(self, attrs):
-        nickname = attrs.get('nickname')
-        email = attrs.get('email')
+        identifier = attrs.get('identifier')
         password = attrs.get('password')
 
-        if (nickname or email) and password:
-            user = authenticate(username=nickname, email=email, password=password)
+        if identifier.find('@') == -1:
+            nickname = identifier
+            email = None
+        else:
+            nickname = None
+            email = identifier
+
+        if identifier and password:
+            user = authenticate(nickname=nickname, email=email, password=password)
 
             if user:
                 if not user.is_active:

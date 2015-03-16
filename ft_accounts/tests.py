@@ -62,7 +62,7 @@ class UserTest(TestCase):
         user = authenticate(email="test@test.com", password="hahahah")
         self.assertIsNotNone(user)
 
-    def test_user_login(self):
+    def test_user_login_nickname(self):
         self.client.post("/api/accounts/register/", {
             'nickname': u'  哈哈哈  ',
             'email': 'test@test.com',
@@ -70,12 +70,29 @@ class UserTest(TestCase):
         })
 
         res = self.client.post("/api/accounts/login/", {
-            'nickname': u'哈哈哈',
+            'identifier': u'哈哈哈',
             'password': 'testpass'
         })
 
         pprint(res.content)
         self.assertEqual(res.status_code, 201)
+
+
+    def test_user_login_email(self):
+        self.client.post("/api/accounts/register/", {
+            'nickname': u'  哈哈哈  ',
+            'email': 'test@test.com',
+            'password': 'testpass'
+        })
+
+        res = self.client.post("/api/accounts/login/", {
+            'identifier': 'test@test.com',
+            'password': 'testpass'
+        })
+
+        pprint(res.content)
+        self.assertEqual(res.status_code, 201)
+
 
     def test_weixin_bind(self):
         response = self.client.post('/api/accounts/bind/weixin/', {

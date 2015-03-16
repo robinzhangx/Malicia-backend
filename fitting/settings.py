@@ -78,12 +78,8 @@ DATABASES = {
 
 if env.get('environment', 'dev') != 'prod':
     DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.mysql',
-        'HOST': '192.168.59.103',
-        'PORT': 3306,
-        'NAME': 'fitting',
-        'USER': 'fitting',
-        'PASSWORD': 'Fitting123',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'db.sqlite'
     }
 
 # Internationalization
