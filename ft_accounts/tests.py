@@ -51,6 +51,29 @@ class UserTest(TestCase):
 
         self.assertEqual(response.status_code, 409)
 
+    def test_user_login_fail(self):
+        response = self.client.post("/api/accounts/register/", {
+            'nickname': 'nickname',
+            'email': 'test@test.com',
+            'password': 'testpass'
+        })
+
+        response = self.client.post("/api/accounts/login/", {
+            'identifier': 'nickname',
+            'password': 'testpassss'
+        })
+        self.assertEqual(response.status_code, 400)
+        obj = json.loads(response.content)
+        self.assertEqual(obj["code"], 4002)
+
+        response = self.client.post("/api/accounts/login/", {
+            'password': 'testpass'
+        })
+        self.assertEqual(response.status_code, 400)
+        obj = json.loads(response.content)
+        pprint(obj)
+        self.assertEqual(obj["code"], 40040)
+
     def test_user_nickname_unicode(self):
         response = self.client.post("/api/accounts/register/", {
             'nickname': u'  哈哈哈  ',

@@ -64,13 +64,28 @@ class Register(APIView):
 
 
 class Login(APIView):
+    def convert_errors(self, errors):
+        # we just need 1
+        for _, sub_errors in errors.iteritems():
+            error = sub_errors[0]
+            try:
+                tokens = error.split(" ")
+                code = int(tokens.pop(0))
+                return code, " ".join(tokens)
+            except Exception:
+                return 4000, error
+
     def post(self, request):
         serializer = UserLoginSerializer(data=request.POST)
         if serializer.is_valid():
             user = serializer.validated_data['user']
             return Response(serialize_user_with_token(user, with_token=True), status=201)
         else:
-            return Response(serializer.errors, status=400)
+            code, message = self.convert_errors(serializer.errors)
+            return Response({
+                "message": message,
+                "code": code
+            }, status=400)
 
 
 class Logout(APIView):

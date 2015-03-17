@@ -14,8 +14,18 @@ class UserRegisterSerializer(serializers.Serializer):
 
 
 class UserLoginSerializer(serializers.Serializer):
-    identifier = serializers.CharField(max_length=128, default=None)
-    password = serializers.CharField(max_length=64)
+    identifier = serializers.CharField(max_length=128, required=True, allow_blank=False, allow_null=False, error_messages={
+        'required': '40040 identifier required',
+        'max_length': '40041 identifier exceed max length',
+        'blank': '40042 identifier field not allow blank',
+        'null': '40043 identifier field not allow null',
+    })
+    password = serializers.CharField(max_length=64, required=True, allow_blank=False, allow_null=False, error_messages={
+        'required': '40050 password field required',
+        'max_length': '40051 password exceed max length',
+        'blank': '40052 password field not allow blank',
+        'null': '40053 password field not allow null',
+    })
 
     def validate(self, attrs):
         identifier = attrs.get('identifier')
@@ -33,11 +43,11 @@ class UserLoginSerializer(serializers.Serializer):
 
             if user:
                 if not user.is_active:
-                    raise ValidationError(u'用户没有激活')
+                    raise ValidationError('4001 User not active')
             else:
-                raise ValidationError(u'无法使用提供的账号登录')
+                raise ValidationError('4002 Not able to login')
         else:
-            raise ValidationError(u'请提供昵称或邮箱以及密码')
+            raise ValidationError('4003 Require identifier and password')
 
         attrs['user'] = user
         return attrs
