@@ -70,7 +70,7 @@ class Login(APIView):
             user = serializer.validated_data['user']
             return Response(serialize_user_with_token(user, with_token=True), status=201)
         else:
-            return Response(serializer.errors, status=401)
+            return Response(serializer.errors, status=400)
 
 
 class Logout(APIView):

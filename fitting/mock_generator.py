@@ -1,5 +1,5 @@
 import random
-from django.contrib.auth.models import User
+from ft_accounts.models import User
 
 
 class MockGeneratorBase(object):

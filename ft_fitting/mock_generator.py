@@ -34,7 +34,7 @@ class MockGenerator(MockGeneratorBase):
         for i in xrange(0, count):
             fitting = Fitting()
             fitting.user = cls.random_user().next()
-            fitting.bmi = fitting.user.profile.bmi
+            fitting.bmi = fitting.user.bmi
             fitting.title = cls.pick_one(cls.fitting_titles)
 
             fitting.save()

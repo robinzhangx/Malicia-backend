@@ -10,7 +10,7 @@ class MockGenerator(MockGeneratorBase):
             User.objects.filter(is_superuser=False).delete()
 
         for x in xrange(0, count):
-            u = User(username="user_%d" % x)
+            u = User(nickname="user_%d" % x)
             u.set_password("testpass")
-            u.email = u.username + "@fitting.com"
+            u.email = u.nickname + "@fitting.com"
             u.save()

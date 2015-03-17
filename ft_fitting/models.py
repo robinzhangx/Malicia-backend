@@ -44,6 +44,7 @@ class Ingredient(models.Model):
     def __unicode__(self):
         return u'%s: %s' % (self.id, self.part)
 
+
 class Ask(models.Model):
     ingredient = models.ForeignKey(Ingredient, related_name='asks')
     user = models.ForeignKey(User, related_name='asks')
