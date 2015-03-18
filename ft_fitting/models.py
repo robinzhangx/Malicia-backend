@@ -52,3 +52,8 @@ class Ask(models.Model):
     answered = models.BooleanField(u'是否回答', default=False)
 
     created_at = models.DateTimeField(u'询问时间', auto_now_add=True)
+
+
+class FittingForDiscover(models.Model):
+    fitting = models.OneToOneField(Fitting, related_name='discover')
+    created_at = models.DateTimeField(auto_now_add=True)

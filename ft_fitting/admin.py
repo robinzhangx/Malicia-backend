@@ -1,5 +1,6 @@
 from django.contrib import admin
-from ft_fitting.models import Fitting, Ingredient
+from ft_fitting.models import Fitting, Ingredient, FittingForDiscover
+
 
 @admin.register(Fitting)
 class FittingAdmin(admin.ModelAdmin):
@@ -18,3 +19,10 @@ class IngredientAdmin(admin.ModelAdmin):
 
     def user(self, obj):
         return obj.user.nickname
+
+@admin.register(FittingForDiscover)
+class FittingForDiscoverAdmin(admin.ModelAdmin):
+    list_display = ('id', 'fitting_id')
+
+    def fitting_id(self, obj):
+        return obj.fitting.id

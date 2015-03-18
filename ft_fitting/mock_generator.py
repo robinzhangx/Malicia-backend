@@ -2,7 +2,7 @@
 from itertools import groupby
 import random
 from fitting.mock_generator import MockGeneratorBase
-from ft_fitting.models import Fitting, Ingredient
+from ft_fitting.models import Fitting, Ingredient, FittingForDiscover
 
 
 class MockGenerator(MockGeneratorBase):
@@ -68,3 +68,17 @@ class MockGenerator(MockGeneratorBase):
                     if fitting is not None:
                         i.fittings.add(fitting)
                 i.save()
+
+    @classmethod
+    def generate_discover_fitting(cls, count=20, clear=False):
+        if clear:
+            FittingForDiscover.objects.all().delete()
+
+        fittings = Fitting.objects.all()
+        for i in xrange(0, count):
+            try:
+                d = FittingForDiscover()
+                d.fitting = cls.pick_one(fittings)
+                d.save()
+            except:
+                pass
