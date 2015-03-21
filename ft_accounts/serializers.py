@@ -57,6 +57,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'nickname', 'email', 'date_joined', 'avatar', 'height', 'gender', 'weight', 'bmi')
+        read_only_fields = ('id', 'nickname', 'email', 'date_joined')
 
 
 def serialize_user_with_token(user, with_token=False):

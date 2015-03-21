@@ -2,6 +2,7 @@
 import json
 from pprint import pprint
 from django.contrib.auth import authenticate
+from rest_framework import status
 from ft_accounts.models import User
 from django.test import TestCase
 
@@ -138,6 +139,21 @@ class UserTest(TestCase):
 
         pprint(res.content)
         self.assertEqual(res.status_code, 201)
+
+    def test_me(self):
+        user = User(nickname='test')
+        user.set_password('testpass')
+        user.save()
+
+        self.client.login(nickname='test', password='testpass')
+        response = self.client.get('/api/accounts/me/')
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post('/api/accounts/me/', {
+            "weight": 200
+        })
+        self.assertTrue(status.is_success(response.status_code))
+        user = User.objects.get(id=user.id)
+        self.assertEqual(user.weight, 200)
 
     def test_weixin_bind(self):
         response = self.client.post('/api/accounts/bind/weixin/', {

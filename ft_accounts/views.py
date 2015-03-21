@@ -2,6 +2,7 @@ from pprint import pprint
 import datetime
 from django.contrib.auth import logout
 from django.db import IntegrityError
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -63,29 +64,30 @@ class Register(APIView):
             return Response(serializer.errors, status=400)
 
 
-class Login(APIView):
-    def convert_errors(self, errors):
-        # we just need 1
-        for _, sub_errors in errors.iteritems():
-            error = sub_errors[0]
-            try:
-                tokens = error.split(" ")
-                code = int(tokens.pop(0))
-                return code, " ".join(tokens)
-            except Exception:
-                return 4000, error
+def convert_errors(errors):
+    # we just need 1
+    for _, sub_errors in errors.iteritems():
+        error = sub_errors[0]
+        try:
+            tokens = error.split(" ")
+            code = int(tokens.pop(0))
+            return code, " ".join(tokens)
+        except Exception:
+            return 4000, error
 
+
+class Login(APIView):
     def post(self, request):
         serializer = UserLoginSerializer(data=request.POST)
         if serializer.is_valid():
             user = serializer.validated_data['user']
             return Response(serialize_user_with_token(user, with_token=True), status=201)
         else:
-            code, message = self.convert_errors(serializer.errors)
+            code, message = convert_errors(serializer.errors)
             return Response({
                 "message": message,
                 "code": code
-            }, status=400)
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 
 class Logout(APIView):
@@ -95,7 +97,7 @@ class Logout(APIView):
         user = request.user
         logout(request)
         # Do some clean up logic
-        return Response(status=200)
+        return Response(status=status.HTTP_200_OK)
 
 
 class Me(APIView):
@@ -104,6 +106,19 @@ class Me(APIView):
     def get(self, request):
         user = request.user
         return Response(UserSerializer(user).data)
+
+    def post(self, request):
+        user = request.user
+        serializer = UserSerializer(user, data=request.DATA, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            code, message = convert_errors(serializer.errors)
+            return Response({
+                "message": message,
+                "code": code
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 
 class WeixinBind(APIView):
@@ -129,7 +144,7 @@ class WeixinBind(APIView):
             if existing.exists():
                 # TODO Also check the access token
                 weixin = existing.first()
-                return Response(serialize_user_with_token(weixin.user, with_token=True), status=200)
+                return Response(serialize_user_with_token(weixin.user, with_token=True))
 
             weixin = WeixinAccount()
             weixin.access_token = access_token
