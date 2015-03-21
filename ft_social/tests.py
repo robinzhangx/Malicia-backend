@@ -1,8 +1,7 @@
 import json
 from pprint import pprint
 from django.test import TestCase
-
-# Create your tests here.
+from rest_framework import status
 from fitting.redis_store import redis_store
 from ft_accounts.models import User
 from ft_social.models import Follow
@@ -43,4 +42,28 @@ class SocialTest(TestCase):
         obj = json.loads(response.content)
         pprint(obj)
         self.assertEqual(len(obj), 1)
+
+        response = self.client.post('/api/social/following/', {
+            'user': 2
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Follow again, you get a 200
+        response = self.client.post('/api/social/following/', {
+            'user': 2
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check following list, we got 2 followers
+        response = self.client.get('/api/social/following/')
+        self.assertEqual(response.status_code, 200)
+        obj = json.loads(response.content)
+        pprint(obj)
+        self.assertEqual(len(obj), 2)
+
+        response = self.client.get('/api/social/following/2/')
+        self.assertEqual(response.status_code, 200)
+        obj = json.loads(response.content)
+        pprint(obj)
+        self.assertTrue(obj['following'])
 
