@@ -4,6 +4,7 @@ from django.test import TestCase
 from rest_framework import status
 from fitting.redis_store import redis_store
 from ft_accounts.models import User
+from ft_notification.utils import get_notifications
 from ft_social.models import Follow
 
 
@@ -28,6 +29,15 @@ class SocialTest(TestCase):
 
     def test_follow(self):
         self.assertEqual(redis_store.zcount('following_1', min=0, max=99999999999999999), 1)
+        notifications = get_notifications(1)
+        pprint(notifications)
+        self.assertGreater(len(notifications), 0)
+        self.assertEqual(json.loads(notifications[0]), {
+            "follower": 5,
+            "read_at": None,
+            "type": "new_follower",
+            "id": 5
+        })
 
     def test_follow_api(self):
         self.client.login(nickname='user_1', password='testpass')

@@ -3,6 +3,7 @@ from django.db import models
 from fitting.redis_store import redis_store
 from ft_accounts.models import User
 from ft_accounts.serializers import UserSerializer
+from ft_notification.utils import create_notification
 
 
 class Follow(models.Model):
@@ -20,10 +21,18 @@ class Follow(models.Model):
         super(Follow, self).save(force_insert=force_insert, force_update=force_update, using=using,
              update_fields=update_fields)
 
-        timestamp = (datetime.utcnow() - datetime(1970, 1, 1)).total_seconds()
+        redis_store.zadd('following_%s' % str(self.left.id), self.right.id, UserSerializer(self.right).data)
+        redis_store.zadd('followed_by_%s' % str(self.right.id), self.left.id, UserSerializer(self.left).data)
 
-        redis_store.zadd('following_%s' % str(self.left.id), timestamp, UserSerializer(self.right).data)
-        redis_store.zadd('followed_by_%s' % str(self.right.id), timestamp, UserSerializer(self.left).data)
+        create_notification(self.right.id, {
+            "type": "new_follower",
+            "follower": self.left.id,  # TODO Check whether we need to add some user info here
+        })
+
+    def delete(self, using=None):
+        super(Follow, self).delete(using=using)
+        redis_store.zremrangebyscore('following_%s' % str(self.left.id), self.right.id, self.right.id)
+        redis_store.zremrangebyscore('followed_by_%s' % str(self.right.id), self.left.id, self.left.id)
 
     def __unicode__(self):
         return "{0} -> {1}".format(self.left, self.right)

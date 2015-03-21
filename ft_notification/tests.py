@@ -28,17 +28,33 @@ class NotificationTest(TestCase):
         response = self.client.get('/api/notifications/?page=0')
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.post('/api/admin/notifications/', json.dumps({
-            "user_id": user.id,
-            "notification": {
-                "type": "short message",
-                "message": "Hello there",
-                "from_id": 1,
-            }
-        }), content_type="application/json")
-        self.assertEqual(response.status_code, 201)
+        for x in xrange(0, 100):
+            response = self.client.post('/api/admin/notifications/', json.dumps({
+                "user_id": user.id,
+                "notification": {
+                    "type": "short message",
+                    "message": "Hello there {0}".format(x),
+                    "from_id": 1,
+                }
+            }), content_type="application/json")
+            self.assertEqual(response.status_code, 201)
 
         response = self.client.get('/api/notifications/?page=0')
         obj = json.loads(response.content)
         pprint(obj)
-        self.assertEqual(len(obj['notifications']), 1)
+        self.assertEqual(len(obj['notifications']), 20)
+
+        response = self.client.post('/api/notifications/100/', json.dumps({
+            "read": True
+        }), content_type="application/json")
+        obj = json.loads(response.content)
+        pprint(obj)
+        self.assertIsNotNone(obj['read_at'])
+
+        response = self.client.post('/api/notifications/100/', json.dumps({
+            "read": False
+        }), content_type="application/json")
+        obj = json.loads(response.content)
+        pprint(obj)
+        self.assertIsNone(obj['read_at'])
+
