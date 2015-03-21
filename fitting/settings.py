@@ -13,6 +13,9 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 import json
+import sys
+
+TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
 
 env = {}
 # noinspection PyBroadException
@@ -48,6 +51,8 @@ INSTALLED_APPS = (
     'rest_framework_swagger',
     'ft_accounts',
     'ft_fitting',
+    'ft_social',
+    'ft_notification',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -122,3 +127,12 @@ AUTHENTICATION_BACKENDS = (
 )
 
 AUTH_USER_MODEL = "ft_accounts.User"
+
+REDIS_HOST = 'localhost'
+REDIS_PORT = 6379
+REDIS_DB = 1
+
+if TESTING:
+    REDIS_DB = 9
+
+

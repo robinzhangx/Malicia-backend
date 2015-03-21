@@ -7,6 +7,8 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'', include('ft_accounts.urls')),
     url(r'', include('ft_fitting.urls')),
+    url(r'', include('ft_notification.urls')),
+    url(r'', include('ft_social.urls')),
     url(r'^api/images/(?P<filename>.*)$', 'ft_media.views.upload_view'),
     url(r'^docs/', include('rest_framework_swagger.urls')),
 

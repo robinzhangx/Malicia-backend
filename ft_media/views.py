@@ -12,7 +12,10 @@ class UploadApiView(APIView):
 
     def put(self, request, filename):
         file_obj = request.data['file']
-        path = default_storage.save(os.path.join('images', filename), file_obj)
-        return Response({"path": path}, status=204)
+        if not default_storage.exists(os.path.join('images', filename)):
+            path = default_storage.save(os.path.join('images', filename), file_obj)
+        else:
+            path = default_storage.path(os.path.join('images', filename))
+        return Response({"path": path}, status=200)
 
 upload_view = UploadApiView.as_view()
