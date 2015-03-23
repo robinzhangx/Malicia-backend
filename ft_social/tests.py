@@ -40,6 +40,7 @@ class SocialTest(TestCase):
         })
 
     def test_follow_api(self):
+        u = User.objects.get(nickname='user_1')
         self.client.login(nickname='user_1', password='testpass')
         response = self.client.get('/api/social/followers/')
         self.assertEqual(response.status_code, 200)
@@ -54,13 +55,23 @@ class SocialTest(TestCase):
         self.assertEqual(len(obj), 1)
 
         response = self.client.post('/api/social/following/', {
-            'user': 2
+            'user': 3
         })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+        response = self.client.post('/api/social/following/', {
+            'user': u.id
+        })
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        response = self.client.post('/api/social/following/', {
+            'user': 199999999999
+        })
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
         # Follow again, you get a 200
         response = self.client.post('/api/social/following/', {
-            'user': 2
+            'user': 3
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -71,7 +82,7 @@ class SocialTest(TestCase):
         pprint(obj)
         self.assertEqual(len(obj), 2)
 
-        response = self.client.get('/api/social/following/2/')
+        response = self.client.get('/api/social/following/3/')
         self.assertEqual(response.status_code, 200)
         obj = json.loads(response.content)
         pprint(obj)

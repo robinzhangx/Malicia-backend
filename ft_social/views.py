@@ -28,12 +28,25 @@ class Following(ListAPIView):
     # noinspection PyMethodMayBeStatic
     def post(self, request):
         if 'user' in request.DATA:
-            user_id = request.DATA.get('user')
-            follow, created = Follow.objects.get_or_create(left=request.user, right=User.objects.get(id=user_id))
-            if created:
-                return Response(status=status.HTTP_201_CREATED)
-            else:
-                return Response(status=status.HTTP_200_OK)
+            user_id = int(request.DATA.get('user'))
+            if user_id == request.user.id:
+                return Response({
+                    'code': 4000,
+                    'message': 'Not able to follow self'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            try:
+                target = User.objects.get(id=user_id)
+                follow, created = Follow.objects.get_or_create(left=request.user, right=target)
+                if created:
+                    return Response(status=status.HTTP_201_CREATED)
+                else:
+                    return Response(status=status.HTTP_200_OK)
+            except User.DoesNotExist, _:
+                return Response({
+                    'code': 4001,
+                    'message': 'User does not exists'
+                }, status=status.HTTP_400_BAD_REQUEST)
 
 
 class FollowingUser(APIView):
@@ -42,5 +55,5 @@ class FollowingUser(APIView):
     def get(self, request, user_id):
         user = request.user
         return Response({
-            "following": Follow.objects.filter(left=user, right_id=user_id).exists()
+            "following": Follow.objects.filter(left=user, right__id=user_id).exists()
         })
