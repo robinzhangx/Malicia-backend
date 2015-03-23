@@ -88,3 +88,12 @@ class SocialTest(TestCase):
         pprint(obj)
         self.assertTrue(obj['following'])
 
+        response = self.client.delete('/api/social/following/3/')
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get('/api/social/following/3/')
+        self.assertEqual(response.status_code, 200)
+        obj = json.loads(response.content)
+        pprint(obj)
+        self.assertFalse(obj['following'])
+

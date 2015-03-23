@@ -1,9 +1,12 @@
+from datetime import datetime
 from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from fitting.redis_store import redis_store
 from ft_accounts.models import User
+from ft_accounts.serializers import UserSerializer
 from ft_social.models import Follow
 from ft_social.serializers import FollowerSerializer, FollowingSerializer
 
@@ -41,6 +44,8 @@ class Following(ListAPIView):
                 if created:
                     return Response(status=status.HTTP_201_CREATED)
                 else:
+                    timestamp = (datetime.utcnow() - datetime(1970, 1, 1)).total_seconds()
+                    redis_store.zadd('followers_{0}'.format(request.user.id), timestamp, user_id)
                     return Response(status=status.HTTP_200_OK)
             except User.DoesNotExist, _:
                 return Response({
@@ -54,6 +59,13 @@ class FollowingUser(APIView):
 
     def get(self, request, user_id):
         user = request.user
+        rank = redis_store.zrank('followers_{0}'.format(user.id), user_id)
         return Response({
-            "following": Follow.objects.filter(left=user, right__id=user_id).exists()
+            "following": rank is not None
         })
+
+    def delete(self, request, user_id):
+        user = request.user
+        redis_store.zrem('followers_{0}'.format(user.id), user_id)
+        Follow.objects.filter(left=user, right__id=user_id).delete()
+        return Response(status=status.HTTP_200_OK)
