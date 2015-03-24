@@ -1,8 +1,10 @@
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.utils.datetime_safe import datetime
 from django.db import models
+import pytz
 from fitting.redis_store import redis_store
 from ft_accounts.models import User
-from ft_accounts.serializers import UserSerializer
 from ft_notification.utils import create_notification
 
 
@@ -16,23 +18,29 @@ class Follow(models.Model):
             ('left', 'right')
         )
 
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        super(Follow, self).save(force_insert=force_insert, force_update=force_update, using=using,
-             update_fields=update_fields)
-
-        redis_store.zadd('following_%s' % str(self.left.id), self.right.id, UserSerializer(self.right).data)
-        redis_store.zadd('followed_by_%s' % str(self.right.id), self.left.id, UserSerializer(self.left).data)
+    def populate_cache(self):
+        timestamp = (self.created_at - datetime(1970, 1, 1, tzinfo=pytz.utc)).total_seconds()
+        redis_store.zadd('following_{0}'.format(self.left_id), timestamp, self.right_id)
+        redis_store.zadd('followers_{0}'.format(self.right_id), timestamp, self.left_id)
 
         create_notification(self.right.id, {
             "type": "new_follower",
             "follower": self.left.id,  # TODO Check whether we need to add some user info here
         })
 
-    def delete(self, using=None):
-        super(Follow, self).delete(using=using)
-        redis_store.zremrangebyscore('following_%s' % str(self.left.id), self.right.id, self.right.id)
-        redis_store.zremrangebyscore('followed_by_%s' % str(self.right.id), self.left.id, self.left.id)
+    def remove_cache(self):
+        redis_store.zrem('following_{0}'.format(self.left_id), self.right_id)
+        redis_store.zrem('followers_{0}'.format(self.right_id), self.left_id)
 
     def __unicode__(self):
         return "{0} -> {1}".format(self.left, self.right)
+
+
+@receiver(models.signals.post_save, sender=Follow)
+def populate_cache(sender, instance, **kwargs):
+    instance.populate_cache()
+
+
+@receiver(models.signals.post_delete, sender=Follow)
+def remove_cache(sender, instance, **kwargs):
+    instance.remove_cache()

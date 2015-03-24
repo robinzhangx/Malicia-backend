@@ -97,3 +97,9 @@ class SocialTest(TestCase):
         pprint(obj)
         self.assertFalse(obj['following'])
 
+    def populate_cache(self):
+        for f in Follow.objects.all():
+            f.remove_cache()
+
+        for f in Follow.objects.all():
+            f.populate_cache()
