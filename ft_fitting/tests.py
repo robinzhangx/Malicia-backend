@@ -38,3 +38,17 @@ class FittingTest(TestCase):
         self.assertEqual(response.status_code, 400)
         obj = json.loads(response.content)
         self.assertEqual(obj['code'], 4000)
+
+    def test_fitting_api(self):
+        user = User(nickname='test')
+        user.set_password('testpass')
+        user.save()
+
+        self.client.login(nickname='test', password='testpass')
+
+        response = self.client.post("/api/fittings/", {
+            "picture": "http://www.baidu.com",
+            "title": "test",
+        })
+        print response.content
+        self.assertEqual(response.status_code, 201)
