@@ -1,3 +1,4 @@
+# coding=utf-8
 import json
 from django.test import TestCase
 from ft_accounts.models import User
@@ -49,6 +50,28 @@ class FittingTest(TestCase):
         response = self.client.post("/api/fittings/", {
             "picture": "http://www.baidu.com",
             "title": "test",
+        })
+        print response.content
+        self.assertEqual(response.status_code, 201)
+
+    def test_ingredient_api(self):
+        user = User(nickname='test')
+        user.set_password('testpass')
+        user.save()
+
+        fitting = Fitting()
+        fitting.user = user
+        fitting.bmi = user.bmi
+        fitting.title = 'test title'
+        fitting.picture = 'http://www.baidu.com'
+        fitting.save()
+
+        self.client.login(nickname='test', password='testpass')
+
+        response = self.client.post("/api/ingredients/", {
+            "part": u'上装',
+            "size": "hahahh",
+            "fitting": [fitting.id],
         })
         print response.content
         self.assertEqual(response.status_code, 201)
