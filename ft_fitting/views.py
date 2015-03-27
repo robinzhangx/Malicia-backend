@@ -1,9 +1,14 @@
+from django.db.models import F
+from rest_framework import status
 from rest_framework.decorators import list_route
+from rest_framework.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, DestroyModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
-from ft_fitting.models import Fitting, Ingredient, FittingForDiscover
-from ft_fitting.serializers import FittingSerializer, IngredientSerializer
+from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet, ViewSet, GenericViewSet
+from ft_fitting.models import Fitting, Ingredient, FittingForDiscover, LikeFitting, LikeIngredient
+from ft_fitting.serializers import FittingSerializer, IngredientSerializer, LikeFittingSerializer, \
+    LikeIngredientSerializer
 
 
 class FittingViewSet(ModelViewSet):
@@ -45,3 +50,21 @@ class IngredientViewSet(ModelViewSet):
     @list_route(methods=['get'])
     def count(self, request):
         return Response({'count': self.get_queryset().count()})
+
+
+class LikeFittingViewSet(GenericViewSet, ListModelMixin, CreateModelMixin, RetrieveModelMixin, DestroyModelMixin):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = LikeFittingSerializer
+    queryset = LikeFitting.objects.all()
+
+    def get_queryset(self):
+        return self.queryset.filter(user=self.request.user)
+
+
+class LikeIngredientViewSet(GenericViewSet, ListModelMixin, CreateModelMixin, RetrieveModelMixin, DestroyModelMixin):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = LikeIngredientSerializer
+    queryset = LikeIngredient.objects.all()
+
+    def get_queryset(self):
+        return self.queryset.filter(user=self.request.user)

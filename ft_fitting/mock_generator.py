@@ -2,7 +2,7 @@
 from itertools import groupby
 import random
 from fitting.mock_generator import MockGeneratorBase
-from ft_fitting.models import Fitting, Ingredient, FittingForDiscover
+from ft_fitting.models import Fitting, Ingredient, FittingForDiscover, LikeFitting, LikeIngredient
 
 
 class MockGenerator(MockGeneratorBase):
@@ -68,6 +68,40 @@ class MockGenerator(MockGeneratorBase):
                     if fitting is not None:
                         i.fittings.add(fitting)
                 i.save()
+
+    @classmethod
+    def generate_like_fitting(cls):
+        fittings = Fitting.objects.all()
+        for i in xrange(0, 100):
+            try:
+                user = cls.random_user()
+                fitting = cls.pick_one(fittings)
+                like = LikeFitting()
+                like.fitting = fitting
+                like.user = user
+                like.save()
+            except:
+                pass
+
+    @classmethod
+    def generate_like_ingredient(cls):
+        ingredients = Ingredient.objects.all()
+        for i in xrange(0, 100):
+            try:
+                user = cls.random_user()
+                fitting = cls.pick_one(ingredients)
+                like = LikeIngredient()
+                like.fitting = fitting
+                like.user = user
+                like.save()
+            except:
+                pass
+
+
+    @classmethod
+    def generate_likes(cls):
+        cls.generate_like_fitting()
+        cls.generate_like_ingredient()
 
     @classmethod
     def generate_discover_fitting(cls, count=20, clear=False):

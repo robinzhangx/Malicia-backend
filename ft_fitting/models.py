@@ -16,6 +16,9 @@ class Fitting(models.Model):
 
     like_count = models.IntegerField(u'喜爱', default=0)
 
+    def __unicode__(self):
+        return self.title
+
 
 class Ingredient(models.Model):
     Part_Cloths = u'上装'
@@ -39,10 +42,34 @@ class Ingredient(models.Model):
     part = models.CharField(u'部件名称', max_length=32, choices=Part_Choices, null=True, blank=True, db_index=True)
     size = models.CharField(u'尺码', max_length=32, null=True, blank=True)
 
-    like_count = models.IntegerField(u'喜爱数', default=0)
+    like_count = models.IntegerField(default=0)
 
     def __unicode__(self):
         return u'%s: %s' % (self.id, self.part)
+
+
+class LikeFitting(models.Model):
+    user = models.ForeignKey(User)
+    fitting = models.ForeignKey(Fitting)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = (
+            ('user', 'fitting')
+        )
+        ordering = "-created_at",
+
+
+class LikeIngredient(models.Model):
+    user = models.ForeignKey(User)
+    ingredient = models.ForeignKey(Ingredient)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = (
+            ('user', 'ingredient')
+        )
+        ordering = "-created_at",
 
 
 class Ask(models.Model):
