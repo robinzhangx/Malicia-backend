@@ -1,4 +1,8 @@
 # coding=utf-8
+from datetime import datetime
+from django.dispatch import receiver
+import pytz
+from fitting.redis_store import redis_store
 from ft_accounts.models import User
 from django.db import models
 
@@ -58,6 +62,25 @@ class LikeFitting(models.Model):
             ('user', 'fitting')
         )
         ordering = "-created_at",
+
+    def populate_cache(self):
+        timestamp = (self.created_at - datetime(1970, 1, 1, tzinfo=pytz.utc)).total_seconds()
+        redis_store.zadd('like_fitting_{0}'.format(self.user_id), timestamp, self.fitting_id)
+        redis_store.zadd('fitting_followers_{0}'.format(self.fitting_id), timestamp, self.user_id)
+
+    def remove_cache(self):
+        redis_store.zrem('like_fitting_{0}'.format(self.user_id), self.fitting_id)
+        redis_store.zrem('fitting_followers_{0}'.format(self.fitting_id), self.user_id)
+
+
+@receiver(models.signals.post_save, sender=LikeFitting)
+def populate_fitting_like_cache(sender, instance, **kwargs):
+    instance.populate_cache()
+
+
+@receiver(models.signals.post_delete, sender=LikeFitting)
+def remove_fitting_like_cache(sender, instance, **kwargs):
+    instance.remove_cache()
 
 
 class LikeIngredient(models.Model):

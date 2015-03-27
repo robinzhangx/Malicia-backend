@@ -1,11 +1,8 @@
-from django.db.models import F
-from rest_framework import status
 from rest_framework.decorators import list_route
 from rest_framework.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, DestroyModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet, ViewSet, GenericViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from ft_fitting.models import Fitting, Ingredient, FittingForDiscover, LikeFitting, LikeIngredient
 from ft_fitting.serializers import FittingSerializer, IngredientSerializer, LikeFittingSerializer, \
     LikeIngredientSerializer
