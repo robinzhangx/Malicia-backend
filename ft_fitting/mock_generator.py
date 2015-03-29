@@ -2,7 +2,7 @@
 from itertools import groupby
 import random
 from fitting.mock_generator import MockGeneratorBase
-from ft_fitting.models import Fitting, Ingredient, FittingForDiscover, LikeFitting, LikeIngredient
+from ft_fitting.models import Fitting, Ingredient, FittingForDiscover, LikeFitting, LikeIngredient, Ask
 
 
 class MockGenerator(MockGeneratorBase):
@@ -74,7 +74,7 @@ class MockGenerator(MockGeneratorBase):
         fittings = Fitting.objects.all()
         for i in xrange(0, 100):
             try:
-                user = cls.random_user()
+                user = cls.random_user().next()
                 fitting = cls.pick_one(fittings)
                 like = LikeFitting()
                 like.fitting = fitting
@@ -88,7 +88,7 @@ class MockGenerator(MockGeneratorBase):
         ingredients = Ingredient.objects.all()
         for i in xrange(0, 100):
             try:
-                user = cls.random_user()
+                user = cls.random_user().next()
                 fitting = cls.pick_one(ingredients)
                 like = LikeIngredient()
                 like.fitting = fitting
@@ -97,22 +97,28 @@ class MockGenerator(MockGeneratorBase):
             except:
                 pass
 
-
     @classmethod
     def generate_likes(cls):
         cls.generate_like_fitting()
         cls.generate_like_ingredient()
 
     @classmethod
-    def generate_discover_fitting(cls, count=20, clear=False):
-        if clear:
-            FittingForDiscover.objects.all().delete()
+    def generate_asks(cls):
+        ingredients = Ingredient.objects.all()
 
-        fittings = Fitting.objects.all()
-        for i in xrange(0, count):
-            try:
-                d = FittingForDiscover()
-                d.fitting = cls.pick_one(fittings)
-                d.save()
-            except:
-                pass
+        asks = [
+            "What is the size of this?",
+            u"为什么穿起来这么屌",
+            u"你这个裙子有点夸张啊",
+            u"无言以对",
+            u"真的是这么穿么",
+        ]
+
+        for i in ingredients:
+            for _ in xrange(0, 2):
+                ask = Ask()
+                ask.ingredient = i
+                ask.user = cls.random_user().next()
+                ask.content = cls.pick_one(asks)
+                ask.save()
+

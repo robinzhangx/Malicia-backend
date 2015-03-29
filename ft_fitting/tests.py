@@ -19,28 +19,6 @@ class FittingTest(TestCase):
         obj = json.loads(response.content)
         self.assertEqual(obj['count'], 1)
 
-    def test_fitting_for_discover(self):
-        user = User(nickname='test')
-        user.save()
-
-        f = Fitting()
-        f.user = user
-        f.save()
-
-        discover = FittingForDiscover()
-        discover.fitting = f
-        discover.save()
-
-        response = self.client.get("/api/fittings/discover/")
-        self.assertEqual(response.status_code, 200)
-        obj = json.loads(response.content)
-        self.assertEqual(obj['discover_id'], 1)
-
-        response = self.client.get("/api/fittings/discover/?last_discover_id=1")
-        self.assertEqual(response.status_code, 400)
-        obj = json.loads(response.content)
-        self.assertEqual(obj['code'], 4000)
-
     def test_fitting_api(self):
         user = User(nickname='test')
         user.set_password('testpass')
@@ -55,7 +33,7 @@ class FittingTest(TestCase):
         print response.content
         self.assertEqual(response.status_code, 201)
 
-    def test_ingredient_api(self):
+    def test_ingredient_and_ask_api(self):
         user = User(nickname='test')
         user.set_password('testpass')
         user.save()
@@ -76,6 +54,15 @@ class FittingTest(TestCase):
         })
         print response.content
         self.assertEqual(response.status_code, 201)
+
+        response = self.client.post('/api/ingredients/1/asks/', {
+            "content": u'哈哈',
+            "ingredient": 1,
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
+
+        response = self.client.get('/api/ingredients/1/asks/')
+        self.assertEqual(len(json.loads(response.content)), 1)
 
     def test_fitting_like_api(self):
         user = User(nickname='test')

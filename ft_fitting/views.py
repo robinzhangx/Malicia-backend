@@ -3,9 +3,10 @@ from rest_framework.mixins import ListModelMixin, CreateModelMixin, RetrieveMode
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
-from ft_fitting.models import Fitting, Ingredient, FittingForDiscover, LikeFitting, LikeIngredient
+from rest_framework_extensions.mixins import NestedViewSetMixin
+from ft_fitting.models import Fitting, Ingredient, LikeFitting, LikeIngredient, Ask
 from ft_fitting.serializers import FittingSerializer, IngredientSerializer, LikeFittingSerializer, \
-    LikeIngredientSerializer
+    LikeIngredientSerializer, AskSerializer
 
 
 class FittingViewSet(ModelViewSet):
@@ -21,25 +22,14 @@ class FittingViewSet(ModelViewSet):
     def count(self, request):
         return Response({'count': self.get_queryset().count()})
 
-    @list_route(methods=['get'], permission_classes=[])
-    def discover(self, request):
-        prev_discover_id = int(request.GET.get('last_discover_id', 0))
-        qs = FittingForDiscover.objects.filter(id__gt=prev_discover_id).order_by('id')
-        if qs.exists():
-            discover = qs[0]
-            return_obj = self.serializer_class(discover.fitting).data
-            return_obj.update({
-                "discover_id": discover.id
-            })
-            return Response(return_obj)
-        else:
-            return Response({
-                "code": 4000,
-                "message": "Nothing left"
-            }, status=400)
+
+class AskViewSet(NestedViewSetMixin, ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = AskSerializer
+    queryset = Ask.objects.all()
 
 
-class IngredientViewSet(ModelViewSet):
+class IngredientViewSet(ModelViewSet, NestedViewSetMixin):
     permission_classes = ()
     serializer_class = IngredientSerializer
     queryset = Ingredient.objects.all()
@@ -65,3 +55,5 @@ class LikeIngredientViewSet(GenericViewSet, ListModelMixin, CreateModelMixin, Re
 
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)
+
+

@@ -65,11 +65,6 @@ class FittingSerializer(DynamicFieldsModelSerializer):
         return fitting
 
 
-class AskSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Ask
-
-
 class LikeFittingSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
 
@@ -110,3 +105,10 @@ class LikeIngredientSerializer(serializers.ModelSerializer):
         # serializer works
         rep['ingredient'] = IngredientSerializer(Ingredient.objects.get(id=instance.ingredient.id)).data
         return rep
+
+
+class AskSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = Ask
