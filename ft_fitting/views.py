@@ -1,4 +1,5 @@
-from rest_framework.decorators import list_route
+from rest_framework import status
+from rest_framework.decorators import list_route, detail_route
 from rest_framework.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, DestroyModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -21,6 +22,16 @@ class FittingViewSet(ModelViewSet):
     @list_route(methods=['get'], permission_classes=[])
     def count(self, request):
         return Response({'count': self.get_queryset().count()})
+
+    @detail_route(methods=['post', 'delete'])
+    def like(self, request, pk=None):
+        if request.method.lower() == 'post':
+            like = LikeFitting(user=request.user, fitting_id=pk)
+            like.save()
+            return Response(status=status.HTTP_201_CREATED)
+        elif request.method.lower() == 'delete':
+            LikeFitting.objects.filter(user_id=request.user.id, fitting_id=pk).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class AskViewSet(NestedViewSetMixin, ModelViewSet):
@@ -46,6 +57,7 @@ class LikeFittingViewSet(GenericViewSet, ListModelMixin, CreateModelMixin, Retri
 
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)
+
 
 
 class LikeIngredientViewSet(GenericViewSet, ListModelMixin, CreateModelMixin, RetrieveModelMixin, DestroyModelMixin):

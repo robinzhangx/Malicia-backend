@@ -3,7 +3,7 @@ import json
 from django.test import TestCase
 from rest_framework import status
 from ft_accounts.models import User
-from ft_fitting.models import Fitting, FittingForDiscover, Ingredient, LikeIngredient
+from ft_fitting.models import Fitting, FittingForDiscover, Ingredient, LikeIngredient, LikeFitting
 
 
 class FittingTest(TestCase):
@@ -78,15 +78,18 @@ class FittingTest(TestCase):
 
         self.client.login(nickname='test', password='testpass')
 
-        response = self.client.post("/api/like/fittings/", {
-            "fitting": 1
-        })
+        response = self.client.post("/api/fittings/1/like/")
         print response.content
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        response = self.client.delete("/api/like/fittings/1/")
+        self.assertTrue(LikeFitting.objects.filter(user_id=1, fitting_id=1).exists())
+
+        response = self.client.delete("/api/fittings/1/like/")
         print response.content
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(LikeFitting.objects.filter(user_id=1, fitting_id=1).exists())
+
+
 
     def test_ingredient_like_api(self):
         user = User(nickname='test')

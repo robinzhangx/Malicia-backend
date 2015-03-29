@@ -175,7 +175,6 @@ def config_webserver(is_quick=False):
 
 @task
 def deploy():
-    local('git push')
     execute(init)
     execute(check_out)
     execute(config_webserver)
