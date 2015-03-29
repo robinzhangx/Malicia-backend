@@ -65,48 +65,6 @@ class FittingSerializer(DynamicFieldsModelSerializer):
         return fitting
 
 
-class LikeFittingSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
-
-    class Meta:
-        model = LikeFitting
-
-    def create(self, validated_data):
-        like = super(LikeFittingSerializer, self).create(validated_data)
-
-        like.fitting.like_count = F('like_count') + 1
-        like.fitting.save()
-
-        return like
-
-    def to_representation(self, instance):
-        rep = super(LikeFittingSerializer, self).to_representation(instance)
-        rep['fitting'] = FittingSerializer(Fitting.objects.get(id=instance.fitting.id), exclude_fields=('ingredients',)).data
-        return rep
-
-
-class LikeIngredientSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
-
-    class Meta:
-        model = LikeIngredient
-
-    def create(self, validated_data):
-        like = super(LikeIngredientSerializer, self).create(validated_data)
-
-        like.ingredient.like_count = F('like_count') + 1
-        like.ingredient.save()
-
-        return like
-
-    def to_representation(self, instance):
-        rep = super(LikeIngredientSerializer, self).to_representation(instance)
-        # The reason why we fetch the ingredient again is for like_count, it is a F expression which prevents
-        # serializer works
-        rep['ingredient'] = IngredientSerializer(Ingredient.objects.get(id=instance.ingredient.id)).data
-        return rep
-
-
 class AskSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
 

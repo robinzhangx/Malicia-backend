@@ -122,3 +122,21 @@ class MockGenerator(MockGeneratorBase):
                 ask.content = cls.pick_one(asks)
                 ask.save()
 
+    @classmethod
+    def create_fitting(cls, user):
+        fitting = Fitting()
+        fitting.user = user
+        fitting.bmi = user.bmi
+        fitting.title = 'test title'
+        fitting.picture = 'http://www.baidu.com'
+        fitting.save()
+        return fitting
+
+    @classmethod
+    def create_ingredient(cls, user):
+        ingredient = Ingredient()
+        ingredient.part = Ingredient.Part_Cloths
+        ingredient.size = u'超级大'
+        ingredient.user = user
+        ingredient.save()
+        return ingredient

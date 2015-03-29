@@ -3,6 +3,7 @@ import json
 from django.test import TestCase
 from rest_framework import status
 from ft_accounts.models import User
+from ft_fitting.mock_generator import MockGenerator
 from ft_fitting.models import Fitting, FittingForDiscover, Ingredient, LikeIngredient, LikeFitting
 
 
@@ -69,49 +70,35 @@ class FittingTest(TestCase):
         user.set_password('testpass')
         user.save()
 
-        fitting = Fitting()
-        fitting.user = user
-        fitting.bmi = user.bmi
-        fitting.title = 'test title'
-        fitting.picture = 'http://www.baidu.com'
-        fitting.save()
+        MockGenerator.create_fitting(user)
 
         self.client.login(nickname='test', password='testpass')
 
         response = self.client.post("/api/fittings/1/like/")
-        print response.content
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
+        self.assertTrue(LikeFitting.objects.filter(user_id=1, fitting_id=1).exists())
 
+        response = self.client.post("/api/fittings/1/like/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         self.assertTrue(LikeFitting.objects.filter(user_id=1, fitting_id=1).exists())
 
         response = self.client.delete("/api/fittings/1/like/")
-        print response.content
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT, response.content)
         self.assertFalse(LikeFitting.objects.filter(user_id=1, fitting_id=1).exists())
 
-
-
     def test_ingredient_like_api(self):
-        user = User(nickname='test')
-        user.set_password('testpass')
-        user.save()
+        user = MockGenerator.create_user(nickname='test', password='test')
+        MockGenerator.create_ingredient(user)
+        self.client.login(nickname='test', password='test')
 
-        ingredient = Ingredient()
-        ingredient.part = Ingredient.Part_Cloths
-        ingredient.size = u'超级大'
-        ingredient.user_id = 1
-        ingredient.save()
-
-        self.client.login(nickname='test', password='testpass')
-
-        response = self.client.post("/api/like/ingredients/", {
-            "ingredient": 1
-        })
-        print response.content
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = self.client.post("/api/ingredients/1/like/")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
         self.assertEqual(LikeIngredient.objects.all().count(), 1)
 
-        response = self.client.delete("/api/like/ingredients/1/")
-        print response.content
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        response = self.client.post("/api/ingredients/1/like/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        self.assertEqual(LikeIngredient.objects.all().count(), 1)
+
+        response = self.client.delete("/api/ingredients/1/like/")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT, response.content)
         self.assertEqual(LikeIngredient.objects.all().count(), 0)

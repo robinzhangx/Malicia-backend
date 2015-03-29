@@ -4,6 +4,13 @@ from ft_accounts.models import User
 
 class MockGeneratorBase(object):
     @classmethod
+    def create_user(cls, nickname="test", password="test"):
+        user = User(nickname=nickname)
+        user.set_password(password)
+        user.save()
+        return user
+
+    @classmethod
     def random_user(cls):
         users = User.objects.all()
 

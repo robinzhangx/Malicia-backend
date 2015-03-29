@@ -1,13 +1,13 @@
+from django.db.models import F
 from rest_framework import status
 from rest_framework.decorators import list_route, detail_route
-from rest_framework.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, DestroyModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.viewsets import ModelViewSet
 from rest_framework_extensions.mixins import NestedViewSetMixin
+
 from ft_fitting.models import Fitting, Ingredient, LikeFitting, LikeIngredient, Ask
-from ft_fitting.serializers import FittingSerializer, IngredientSerializer, LikeFittingSerializer, \
-    LikeIngredientSerializer, AskSerializer
+from ft_fitting.serializers import FittingSerializer, IngredientSerializer, AskSerializer
 
 
 class FittingViewSet(ModelViewSet):
@@ -26,9 +26,14 @@ class FittingViewSet(ModelViewSet):
     @detail_route(methods=['post', 'delete'])
     def like(self, request, pk=None):
         if request.method.lower() == 'post':
-            like = LikeFitting(user=request.user, fitting_id=pk)
-            like.save()
-            return Response(status=status.HTTP_201_CREATED)
+            like, created = LikeFitting.objects.get_or_create(user=request.user, fitting_id=pk)
+            if created:
+                like.fitting.like_count = F('like_count') + 1
+                like.fitting.save()
+                return Response(status=status.HTTP_201_CREATED)
+            else:
+                return Response(status=status.HTTP_200_OK)
+
         elif request.method.lower() == 'delete':
             LikeFitting.objects.filter(user_id=request.user.id, fitting_id=pk).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -49,23 +54,17 @@ class IngredientViewSet(ModelViewSet, NestedViewSetMixin):
     def count(self, request):
         return Response({'count': self.get_queryset().count()})
 
+    @detail_route(methods=['post', 'delete'])
+    def like(self, request, pk=None):
+        if request.method.lower() == 'post':
+            like, created = LikeIngredient.objects.get_or_create(user=request.user, ingredient_id=pk)
+            if created:
+                like.ingredient.like_count = F('like_count') + 1
+                like.ingredient.save()
+                return Response(status=status.HTTP_201_CREATED)
+            else:
+                return Response(status=status.HTTP_200_OK)
 
-class LikeFittingViewSet(GenericViewSet, ListModelMixin, CreateModelMixin, RetrieveModelMixin, DestroyModelMixin):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = LikeFittingSerializer
-    queryset = LikeFitting.objects.all()
-
-    def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
-
-
-
-class LikeIngredientViewSet(GenericViewSet, ListModelMixin, CreateModelMixin, RetrieveModelMixin, DestroyModelMixin):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = LikeIngredientSerializer
-    queryset = LikeIngredient.objects.all()
-
-    def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
-
-
+        elif request.method.lower() == 'delete':
+            LikeIngredient.objects.filter(user_id=request.user.id, ingredient_id=pk).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
