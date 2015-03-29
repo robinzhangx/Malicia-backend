@@ -1,4 +1,3 @@
-from django.db.models import F
 from rest_framework import status
 from rest_framework.decorators import list_route, detail_route
 from rest_framework.permissions import IsAuthenticated
@@ -13,7 +12,7 @@ from ft_fitting.serializers import FittingSerializer, IngredientSerializer, AskS
 class FittingViewSet(ModelViewSet):
     permission_classes = IsAuthenticated,
     serializer_class = FittingSerializer
-    queryset = Fitting.objects.all()
+    queryset = Fitting.objects.prefetch_related('ingredients', 'likefitting_set').all()
 
     @list_route(permission_classes=[])
     def list(self, request, *args, **kwargs):

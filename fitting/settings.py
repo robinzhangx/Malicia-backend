@@ -53,6 +53,8 @@ INSTALLED_APPS = (
     'ft_fitting',
     'ft_social',
     'ft_notification',
+
+    'debug_toolbar',
 )
 
 MIDDLEWARE_CLASSES = (
