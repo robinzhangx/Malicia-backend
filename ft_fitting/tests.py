@@ -8,6 +8,10 @@ from ft_fitting.models import Fitting, FittingForDiscover, Ingredient, LikeIngre
 
 
 class FittingTest(TestCase):
+    def fitting_obj(self, fitting_id):
+        response = self.client.get('/api/fittings/{0}/'.format(fitting_id))
+        return json.loads(response.content)
+
     def test_fitting_count(self):
         user = User(nickname='test')
         user.save()
@@ -31,8 +35,9 @@ class FittingTest(TestCase):
             "picture": "http://www.baidu.com",
             "title": "test",
         })
-        print response.content
         self.assertEqual(response.status_code, 201)
+        obj = json.loads(response.content)
+        self.assertEqual(obj['like_count'], 0)
 
     def test_ingredient_and_ask_api(self):
         user = User(nickname='test')
@@ -70,7 +75,7 @@ class FittingTest(TestCase):
         user.set_password('testpass')
         user.save()
 
-        MockGenerator.create_fitting(user)
+        fitting = MockGenerator.create_fitting(user)
 
         self.client.login(nickname='test', password='testpass')
 
@@ -78,9 +83,15 @@ class FittingTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
         self.assertTrue(LikeFitting.objects.filter(user_id=1, fitting_id=1).exists())
 
+        fitting = self.fitting_obj(fitting.id)
+        self.assertEqual(fitting['like_count'], 1)
+
         response = self.client.post("/api/fittings/1/like/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         self.assertTrue(LikeFitting.objects.filter(user_id=1, fitting_id=1).exists())
+
+        fitting = self.fitting_obj(fitting['id'])
+        self.assertEqual(fitting['like_count'], 1)
 
         response = self.client.delete("/api/fittings/1/like/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT, response.content)

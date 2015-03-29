@@ -18,10 +18,12 @@ class Fitting(models.Model):
     picture = models.ImageField(u'图片', upload_to='fitting')
     created_at = models.DateTimeField(u'发布时间', auto_now_add=True)
 
-    like_count = models.IntegerField(u'喜爱', default=0)
-
     def __unicode__(self):
         return self.title
+
+    @property
+    def like_count(self):
+        return self.likefitting_set.all().count()
 
 
 class Ingredient(models.Model):
@@ -46,10 +48,12 @@ class Ingredient(models.Model):
     part = models.CharField(u'部件名称', max_length=32, choices=Part_Choices, null=True, blank=True, db_index=True)
     size = models.CharField(u'尺码', max_length=32, null=True, blank=True)
 
-    like_count = models.IntegerField(default=0)
-
     def __unicode__(self):
         return u'%s: %s' % (self.id, self.part)
+
+    @property
+    def like_count(self):
+        return self.likeingredient_set.all().count()
 
 
 class LikeFitting(models.Model):

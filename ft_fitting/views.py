@@ -28,8 +28,6 @@ class FittingViewSet(ModelViewSet):
         if request.method.lower() == 'post':
             like, created = LikeFitting.objects.get_or_create(user=request.user, fitting_id=pk)
             if created:
-                like.fitting.like_count = F('like_count') + 1
-                like.fitting.save()
                 return Response(status=status.HTTP_201_CREATED)
             else:
                 return Response(status=status.HTTP_200_OK)
@@ -59,8 +57,6 @@ class IngredientViewSet(ModelViewSet, NestedViewSetMixin):
         if request.method.lower() == 'post':
             like, created = LikeIngredient.objects.get_or_create(user=request.user, ingredient_id=pk)
             if created:
-                like.ingredient.like_count = F('like_count') + 1
-                like.ingredient.save()
                 return Response(status=status.HTTP_201_CREATED)
             else:
                 return Response(status=status.HTTP_200_OK)

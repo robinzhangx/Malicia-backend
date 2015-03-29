@@ -1,6 +1,5 @@
-from django.db.models import F
 from rest_framework import serializers
-from ft_fitting.models import Fitting, Ingredient, Ask, LikeFitting, LikeIngredient
+from ft_fitting.models import Fitting, Ingredient, Ask
 
 
 class DynamicFieldsModelSerializer(serializers.ModelSerializer):
@@ -28,6 +27,7 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
 
 class IngredientSerializer(serializers.ModelSerializer):
     fitting = serializers.IntegerField(write_only=True)
+    like_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Ingredient
@@ -46,10 +46,14 @@ class IngredientSerializer(serializers.ModelSerializer):
         ingredient.save()
         return ingredient
 
+    def get_like_count(self, obj):
+        return obj.like_count
+
 
 class FittingSerializer(DynamicFieldsModelSerializer):
     ingredients = IngredientSerializer(many=True)
     picture = serializers.URLField()
+    like_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Fitting
@@ -63,6 +67,9 @@ class FittingSerializer(DynamicFieldsModelSerializer):
         fitting.bmi = fitting.user.bmi
         fitting.save()
         return fitting
+
+    def get_like_count(self, obj):
+        return obj.like_count
 
 
 class AskSerializer(serializers.ModelSerializer):
