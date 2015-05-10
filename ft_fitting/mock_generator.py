@@ -2,7 +2,7 @@
 from itertools import groupby
 import random
 from fitting.mock_generator import MockGeneratorBase
-from ft_fitting.models import Fitting, Ingredient, FittingForDiscover, LikeFitting, LikeIngredient, Ask
+from ft_fitting.models import Fitting, Ingredient, LikeFitting, LikeIngredient, Ask, Brand
 
 
 class MockGenerator(MockGeneratorBase):
@@ -26,6 +26,14 @@ class MockGenerator(MockGeneratorBase):
         u'XXXL',
     ]
 
+    brands = [
+        u'Nike',
+        u'M2M',
+        u'Puma',
+        u'Ralph R',
+        u'Jack Jones',
+    ]
+
     @classmethod
     def generate_fittings(cls, clear=False, count=100):
         if clear:
@@ -40,16 +48,29 @@ class MockGenerator(MockGeneratorBase):
             fitting.save()
 
     @classmethod
+    def generate_brand(cls, clear=False):
+        if clear:
+            Brand.objects.all().delete()
+
+        for brand_name in cls.brands:
+            brand = Brand(name=brand_name)
+            brand.save()
+
+
+    @classmethod
     def generate_ingredients(cls, clear=False, count=400):
         if clear:
             Ingredient.objects.all().delete()
 
         parts = [i[0] for i in Ingredient.Part_Choices]
+        brands = Brand.objects.all()
         for i in xrange(0, count):
             ingredient = Ingredient()
             ingredient.part = cls.pick_one(parts)
             ingredient.size = cls.pick_one(cls.ingredient_size)
             ingredient.user = cls.random_user().next()
+            ingredient.picture = "http://g.hiphotos.baidu.com/image/w%3D310/sign=042b0836dbf9d72a1764161ce42b282a/adaf2edda3cc7cd9937758d03b01213fb80e9164.jpg"
+            ingredient.brand = cls.pick_one(brands)
             ingredient.save()
 
     @classmethod

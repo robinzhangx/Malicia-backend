@@ -169,3 +169,7 @@ LOGGING = {
         },
     },
 }
+
+SWAGGER_SETTINGS = {
+    'exclude_namespaces': ["nested"],
+}

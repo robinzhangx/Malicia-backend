@@ -26,6 +26,14 @@ class Fitting(models.Model):
         return self.likefitting_set.all().count()
 
 
+class Brand(models.Model):
+    name = models.CharField(u'名称', max_length=64, db_index=True)
+    description = models.TextField(u'介绍', null=True)
+
+    def __unicode__(self):
+        return self.name
+
+
 class Ingredient(models.Model):
     Part_Cloths = u'上装'
     Part_Pant = u'下装'
@@ -47,6 +55,8 @@ class Ingredient(models.Model):
     created_at = models.DateTimeField(u'创建时间', auto_now_add=True)
     part = models.CharField(u'部件名称', max_length=32, choices=Part_Choices, null=True, blank=True, db_index=True)
     size = models.CharField(u'尺码', max_length=32, null=True, blank=True)
+    picture = models.ImageField(u'图片', upload_to='ingredients', null=True)
+    brand = models.ForeignKey(Brand, null=True)
 
     def __unicode__(self):
         return u'%s: %s' % (self.id, self.part)

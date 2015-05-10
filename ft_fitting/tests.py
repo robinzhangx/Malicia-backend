@@ -58,7 +58,6 @@ class FittingTest(TestCase):
             "size": "hahahh",
             "fitting": [fitting.id],
         })
-        print response.content
         self.assertEqual(response.status_code, 201)
 
         response = self.client.post('/api/ingredients/1/asks/', {
