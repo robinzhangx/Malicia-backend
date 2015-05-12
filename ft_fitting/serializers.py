@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from ft_accounts.serializers import UserSerializer
 from ft_fitting.models import Fitting, Ingredient, Ask
 
 

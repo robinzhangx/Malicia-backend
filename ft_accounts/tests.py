@@ -197,3 +197,21 @@ class UserTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(json.loads(response.content)['token'], token)
+
+    def test_user_fitting_ingredient(self):
+        user = User(nickname='test')
+        user.set_password('testpass')
+        user.save()
+
+        self.client.login(nickname='test', password='testpass')
+
+        response = self.client.post("/api/fittings/", {
+            "picture": "http://www.baidu.com",
+            "title": "test",
+        })
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.get("/api/users/{0}/fittings/".format(user.id))
+        self.assertEqual(response.status_code, 200)
+        results = json.loads(response.content)
+        self.assertEqual(len(results), 1)

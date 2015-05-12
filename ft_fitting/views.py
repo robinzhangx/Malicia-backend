@@ -62,6 +62,18 @@ class IngredientDetailView(IngredientCRUD):
     pass
 
 
+class IngredientsForUser(APIView):
+    def get(self, request, user_id):
+        serializer = IngredientSerializer(Ingredient.objects.filter(user_id=user_id), many=True)
+        return Response(serializer.data)
+
+
+class FittingsForUser(APIView):
+    def get(self, request, user_id):
+        serializer = FittingSerializer(Fitting.objects.filter(user_id=user_id), many=True)
+        return Response(serializer.data)
+
+
 class IngredientAsks(APIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = AskSerializer
