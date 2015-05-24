@@ -4,7 +4,7 @@ from django.test import TestCase
 from rest_framework import status
 from ft_accounts.models import User
 from ft_fitting.mock_generator import MockGenerator
-from ft_fitting.models import Fitting, FittingForDiscover, Ingredient, LikeIngredient, LikeFitting
+from ft_fitting.models import Fitting, FittingForDiscover, Ingredient, LikeIngredient, LikeFitting, Ask
 
 
 class FittingTest(TestCase):
@@ -65,9 +65,32 @@ class FittingTest(TestCase):
             "ingredient": 1,
         })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
+        self.assertEqual(Ask.objects.all().count(), 1)
 
         response = self.client.get('/api/ingredients/1/asks/')
+        print response.content
         self.assertEqual(len(json.loads(response.content)), 1)
+
+    def test_ingredient_create_under_fitting(self):
+        user = User(nickname='test')
+        user.set_password('testpass')
+        user.save()
+
+        fitting = Fitting()
+        fitting.user = user
+        fitting.bmi = user.bmi
+        fitting.title = 'test title'
+        fitting.picture = 'http://www.baidu.com'
+        fitting.save()
+
+        self.client.login(nickname='test', password='testpass')
+
+        response = self.client.post("/api/fittings/%d/ingredients/" % fitting.id, {
+            "part": u'上装',
+            "size": "hahahh",
+        })
+        print response.content
+        self.assertEqual(response.status_code, 201)
 
     def test_fitting_like_api(self):
         user = User(nickname='test')

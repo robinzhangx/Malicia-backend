@@ -54,7 +54,7 @@ INSTALLED_APPS = (
     'ft_social',
     'ft_notification',
 
-    'debug_toolbar',
+    # 'debug_toolbar',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -119,7 +119,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_PAGINATION_CLASS': 'ft_fitting.pagination.LinkHeaderPagination',
-    'PAGE_SIZE': 20
+    'PAGE_SIZE': 20,
 }
 
 # Authentication backend

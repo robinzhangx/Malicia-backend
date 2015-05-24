@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from ft_accounts.serializers import UserSerializer
 from ft_fitting.models import Fitting, Ingredient, Ask
 
 
@@ -27,12 +26,12 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
-    fitting = serializers.IntegerField(write_only=True)
+    fitting = serializers.IntegerField(write_only=True, required=False)
     like_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Ingredient
-        read_only_fields = ('user', 'created_at', 'like_count')
+        read_only_fields = ('user', 'created_at', 'like_count', 'fittings')
 
     def create(self, validated_data):
         fitting_id = validated_data['fitting']
@@ -74,7 +73,16 @@ class FittingSerializer(DynamicFieldsModelSerializer):
 
 
 class AskSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Ask
+        read_only_fields = ('answered',)
+
+    def create(self, validated_data):
+        ask = Ask()
+        ask.user = self.context['request'].user
+        ask.ingredient_id = self.context['ingredient_id']
+        ask.content = validated_data['content']
+        ask.save()
+        return ask

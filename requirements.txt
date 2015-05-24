@@ -5,7 +5,7 @@ MySQL-python==1.2.5
 Pillow==2.7.0
 PyYAML==3.11
 django-filter==0.9.2
-django-rest-swagger==0.2.9
+-e git://github.com/shuoli84/django-rest-swagger.git#egg=django-rest-swagger
 djangorestframework==3.1.0
 ecdsa==0.13
 fabtools==0.19.0

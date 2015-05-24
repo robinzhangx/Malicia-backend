@@ -122,6 +122,9 @@ class Me(APIView):
 
 
 class WeixinBind(APIView):
+    """
+    Bind weixin account
+    """
     def post(self, request):
         try:
             obj = request.data
