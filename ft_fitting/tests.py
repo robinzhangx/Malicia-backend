@@ -27,6 +27,7 @@ class FittingTest(TestCase):
     def test_fitting_api(self):
         user = User(nickname='test')
         user.set_password('testpass')
+        user.bmi = 27
         user.save()
 
         self.client.login(nickname='test', password='testpass')
@@ -38,6 +39,20 @@ class FittingTest(TestCase):
         self.assertEqual(response.status_code, 201)
         obj = json.loads(response.content)
         self.assertEqual(obj['like_count'], 0)
+
+        # Create several fittings with different bmi
+        bmis = [21, 23, 28, 25]
+        for bmi in bmis:
+            fitting = Fitting()
+            fitting.bmi = bmi
+            fitting.user = user
+            fitting.save()
+
+        response = self.client.get("/api/fittings/")
+        obj = json.loads(response.content)
+        print response.content
+        self.assertEqual(obj[0]['bmi'], 27)
+        self.assertEqual(obj[1]['bmi'], 28)
 
     def test_ingredient_and_ask_api(self):
         user = User(nickname='test')

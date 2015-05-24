@@ -22,7 +22,22 @@ class FittingViewSet(ModelViewSet):
 
     @list_route(permission_classes=[], url="{prefix}/")
     def list(self, request, *args, **kwargs):
-        return super(FittingViewSet, self).list(request, *args, **kwargs)
+        if request.user.is_authenticated():
+            user = request.user
+            queryset = Fitting.objects.extra(select={
+                "bmi_diff": "ABS(bmi - {0})".format(user.bmi)
+            }).order_by("bmi_diff")
+
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+
+        else:
+            return super(FittingViewSet, self).list(request, *args, **kwargs)
 
     @list_route(methods=['get'], permission_classes=[])
     def count(self, request):
